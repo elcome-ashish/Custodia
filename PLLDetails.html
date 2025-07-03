@@ -1,0 +1,89 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>PLL Details</title>
+  <style>
+    body {
+      font-family: Segoe UI, sans-serif;
+      margin: 40px;
+    }
+    h2 {
+      text-align: center;
+      color: #1a4c8b;
+    }
+    .label {
+      font-weight: bold;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    td {
+      padding: 8px;
+      vertical-align: top;
+    }
+    .row-between {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .print-button {
+      margin-top: 30px;
+      text-align: center;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #1a4c8b;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0d355f;
+    }
+  </style>
+</head>
+<body>
+  <h2>PLL Entry Details</h2>
+  <div id="pllDetails">
+    <!-- Fetched details will render here -->
+  </div>
+
+  <div class="print-button">
+    <button onclick="window.print()">Print this Page</button>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const itemId = params.get("ID");
+
+    async function loadDetails() {
+      const response = await fetch(_spPageContextInfo.webAbsoluteUrl + 
+        `/_api/web/lists/getbytitle('PLLList')/items(${itemId})`, {
+        headers: { Accept: 'application/json;odata=verbose' }
+      });
+
+      const data = await response.json();
+      const item = data.d;
+
+      document.getElementById("pllDetails").innerHTML = `
+        <table>
+          <tr><td class="label">Custodian:</td><td>${item.Custodian}</td></tr>
+          <tr><td class="label">Location:</td><td>${item.Location}</td></tr>
+          <tr><td class="label">Article Name:</td><td>${item.Article_x0020_Name}</td></tr>
+          <tr><td class="label">Branch:</td><td>${item.BranchName}</td></tr>
+          <tr><td class="label">FA Code:</td><td>${item.Title}</td></tr>
+          <tr><td class="label">PLL Number:</td><td>${item.Branch_x0020_PLL_x0020_No}</td></tr>
+          <tr><td class="label">Specifications:</td><td>${item.Article_x0020_Specification}</td></tr>
+        </table>
+      `;
+    }
+
+    loadDetails();
+  </script>
+</body>
+</html>

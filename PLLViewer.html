@@ -1,0 +1,110 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>PLL Viewer</title>
+  <style>
+    body {
+      font-family: Segoe UI, sans-serif;
+      margin: 30px;
+    }
+    h2 {
+      color: #1a4c8b;
+    }
+    select, table {
+      font-size: 14px;
+      margin-top: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    button {
+      padding: 5px 10px;
+      background-color: #1a4c8b;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    button:hover {
+      background-color: #0d355f;
+    }
+  </style>
+</head>
+<body>
+  <h2>Custodian-wise PLL Viewer</h2>
+  <label for="custodianSelect">Select Custodian:</label>
+  <select id="custodianSelect" onchange="filterByCustodian()">
+    <option value="">-- Select Custodian --</option>
+  </select>
+
+  <table id="pllTable">
+    <thead>
+      <tr>
+        <th>Article Name</th>
+        <th>Location</th>
+        <th>Branch</th>
+        <th>View</th>
+      </tr>
+    </thead>
+    <tbody id="pllTableBody">
+    </tbody>
+  </table>
+
+  <script>
+    let listItems = [];
+
+    async function loadData() {
+      const response = await fetch(_spPageContextInfo.webAbsoluteUrl + 
+        "/_api/web/lists/getbytitle('PLLList')/items?$select=ID,Custodian,Article_x0020_Name,Location,BranchName", {
+        headers: { Accept: 'application/json;odata=verbose' }
+      });
+
+      const data = await response.json();
+      listItems = data.d.results;
+
+      const custodians = [...new Set(listItems.map(item => item.Custodian))];
+      const dropdown = document.getElementById("custodianSelect");
+      custodians.forEach(name => {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        dropdown.appendChild(opt);
+      });
+    }
+
+    function filterByCustodian() {
+      const selected = document.getElementById("custodianSelect").value;
+      const tbody = document.getElementById("pllTableBody");
+      tbody.innerHTML = "";
+
+      const filtered = listItems.filter(item => item.Custodian === selected);
+
+      filtered.forEach(item => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${item.Article_x0020_Name}</td>
+          <td>${item.Location}</td>
+          <td>${item.BranchName}</td>
+          <td><button onclick="viewDetails(${item.ID})">View</button></td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function viewDetails(id) {
+      window.open('PLLDetails.html?ID=' + id, '_blank');
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
